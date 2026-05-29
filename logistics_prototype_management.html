@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>样机物流与流转管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1c1c1f;
+            --success-color: #333337;
+            --warning-color: #767680;
+            --danger-color: #8e1d23;
+            --text-color: #1c1c1f;
+            --secondary-text: #6b6b6f;
+            --border-color: rgba(60, 60, 67, 0.18);
+            --bg-surface: #ffffff;
+            --bg-muted: #f5f5f7;
+            --placeholder-color: #8e8e93;
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-muted);
+            color: var(--text-color);
+            line-height: 1.65;
+            min-height: 100vh;
+        }
+
+        /* 头部导航 */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.98);
+            color: var(--text-color);
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+        }
+
+        .navbar-left {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .account-selector {
+            padding: 10px 14px;
+            border: 1px solid rgba(60, 60, 67, 0.14);
+            border-radius: 12px;
+            font-size: 14px;
+            background-color: #ffffff;
+            color: var(--text-color);
+            cursor: pointer;
+            min-width: 140px;
+            appearance: none;
+        }
+
+        .account-selector option {
+            background-color: white;
+            color: var(--text-color);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1100px;
+            margin: 40px auto 60px;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 34px;
+            color: var(--text-color);
+            letter-spacing: -0.02em;
+        }
+
+        /* 模块容器 */
+        .module {
+            background-color: var(--bg-surface);
+            border-radius: 28px;
+            padding: 32px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(60, 60, 67, 0.08);
+        }
+
+        .module-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.08);
+        }
+
+        /* 禁用遮罩 */
+        .module.disabled {
+            position: relative;
+            opacity: 0.6;
+        }
+
+        .module.disabled::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.5);
+            border-radius: 28px;
+            cursor: not-allowed;
+            z-index: 10;
+        }
+
+        .module.disabled button,
+        .module.disabled input,
+        .module.disabled select {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* 输入框和下拉框 */
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 14px 16px;
+            font-size: 15px;
+            border: 1px solid rgba(60, 60, 67, 0.14);
+            border-radius: 14px;
+            font-family: inherit;
+            background-color: #f7f7fb;
+            color: var(--text-color);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+            min-height: 46px;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: rgba(60, 60, 67, 0.28);
+            box-shadow: 0 0 0 6px rgba(60, 60, 67, 0.08);
+            background-color: #fff;
+        }
+
+        input::placeholder {
+            color: var(--placeholder-color);
+            opacity: 1;
+        }
+
+        /* 按钮 */
+        button {
+            padding: 12px 20px;
+            font-size: 15px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+            font-family: inherit;
+            min-height: 46px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #101012;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: #27272a;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+            box-shadow: 0 10px 20px rgba(142, 29, 35, 0.22);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background-color: #7b1519;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 表单行 */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-text);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 14px;
+            margin-top: 18px;
+        }
+
+        table th,
+        table td {
+            padding: 16px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.08);
+            background-color: transparent;
+            vertical-align: middle;
+        }
+
+        table th {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--secondary-text);
+            border-bottom: 1px solid rgba(60, 60, 67, 0.16);
+        }
+
+        table tr {
+            background-color: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            transition: background-color 0.2s ease;
+        }
+
+        table tr:nth-child(even) {
+            background-color: rgba(245, 245, 250, 0.95);
+        }
+
+        table tr:hover {
+            background-color: rgba(235, 239, 247, 0.95);
+        }
+
+        /* 嵌套表格 */
+        .nested-table-container {
+            display: none;
+        }
+
+        .nested-table-container.show {
+            display: table-row;
+        }
+
+        .nested-table-container td {
+            padding: 0;
+            border: none;
+        }
+
+        .nested-table {
+            width: 100%;
+            background-color: rgba(242, 242, 247, 0.95);
+            border-collapse: collapse;
+            margin: 10px 0;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .nested-table th,
+        .nested-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border: 1px solid rgba(60, 60, 67, 0.12);
+            font-size: 13px;
+            background-color: #fff;
+        }
+
+        .nested-table th {
+            background-color: rgba(255, 255, 255, 0.92);
+            color: var(--secondary-text);
+            font-weight: 600;
+        }
+
+        /* 数量输入框组 */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-control button {
+            padding: 4px 8px;
+            font-size: 12px;
+            min-width: 32px;
+        }
+
+        .quantity-control input {
+            width: 60px;
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        /* 物流查询模块 */
+        #trackingResult {
+            display: none;
+            margin-top: 20px;
+            padding: 22px 24px;
+            border: 1px solid rgba(60, 60, 67, 0.12);
+            background-color: #fff;
+            border-radius: 18px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.06);
+        }
+
+        #trackingResult.show {
+            display: block;
+        }
+
+        #trackingResult.error {
+            border-color: rgba(191, 95, 88, 0.25);
+            background-color: #fff2f1;
+        }
+
+        .tracking-info {
+            margin-bottom: 12px;
+        }
+
+        .tracking-info label {
+            font-weight: 600;
+            color: var(--secondary-text);
+            display: inline-block;
+            width: 110px;
+        }
+
+        .tracking-number {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 13px;
+            background-color: rgba(60, 60, 67, 0.06);
+            color: var(--text-color);
+        }
+
+        .status-shipped {
+            color: var(--text-color);
+            background-color: rgba(60, 60, 67, 0.08);
+        }
+
+        .status-in-transit {
+            color: var(--text-color);
+            background-color: rgba(60, 60, 67, 0.08);
+        }
+
+        .status-delivered {
+            color: var(--text-color);
+            background-color: rgba(60, 60, 67, 0.08);
+        }
+
+        .history-list {
+            margin-top: 12px;
+            padding-left: 20px;
+        }
+
+        .history-list li {
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .history-time {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Toast通知 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(28, 28, 31, 0.55);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: min(460px, 100%);
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 34px 30px;
+            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.18);
+            border: 1px solid rgba(60, 60, 67, 0.12);
+        }
+
+        .login-card h2 {
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .login-card p {
+            margin-bottom: 24px;
+            color: var(--secondary-text);
+            line-height: 1.55;
+        }
+
+        .btn-secondary {
+            background-color: rgba(60, 60, 67, 0.08);
+            color: var(--text-color);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: rgba(60, 60, 67, 0.14);
+        }
+
+        .login-note {
+            margin-top: 14px;
+            color: var(--secondary-text);
+            font-size: 13px;
+        }
+
+        .toast {
+            background-color: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 16px 22px;
+            margin-bottom: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.25s ease;
+            border-left: 4px solid transparent;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left-color: var(--success-color);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            padding: 0;
+            margin-left: 15px;
+            font-size: 20px;
+            color: var(--secondary-text);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .toast-close:hover {
+            color: var(--text-color);
+        }
+
+        .toast-message {
+            flex: 1;
+            color: var(--text-color);
+        }
+
+        /* 流转数据表 */
+        .transfer-log-table {
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        .transfer-log-table th,
+        .transfer-log-table td {
+            padding: 10px 12px;
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            table th,
+            table td {
+                padding: 10px 8px;
+            }
+
+            .btn-small {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .module {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <nav class="navbar">
+        <div class="navbar-left">样机管理系统</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="color: var(--secondary-text);">当前账号：</span>
+            <span id="currentAccountName" style="font-weight: 600;">未登录</span>
+            <button class="btn-secondary" id="logoutButton" style="display: none;" onclick="logout()">退出登录</button>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 页面标题 -->
+        <h1 class="page-title">样机物流与流转管理系统</h1>
+
+        <!-- 物流单号查询模块 -->
+        <div class="module" id="trackingModule">
+            <div class="module-title">物流单号查询</div>
+            <div class="form-row">
+                <input type="text" id="trackingNumber" placeholder="请输入物流单号" style="flex: 1; min-width: 200px;">
+                <button class="btn-primary" onclick="queryTracking()">查询</button>
+            </div>
+            <div id="trackingResult"></div>
+        </div>
+
+        <!-- 样机流转模块 -->
+        <div class="module" id="transferModule">
+            <div class="module-title">样机流转</div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>转出供应商</label>
+                    <select id="transferFromSupplier" onchange="updateTransferModels()">
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>转入供应商</label>
+                    <select id="transferToSupplier">
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>流转型号</label>
+                    <select id="transferModel">
+                        <option value="">请先选择转出供应商</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>数量</label>
+                    <div class="quantity-control">
+                        <button class="btn-small btn-primary" onclick="decreaseTransferQty()">-</button>
+                        <input type="number" id="transferQty" value="1" min="1" max="999">
+                        <button class="btn-small btn-primary" onclick="increaseTransferQty()">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>物流单号</label>
+                    <input type="text" id="transferTracking" placeholder="物流单号">
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>备注</label>
+                    <input type="text" id="transferRemark" placeholder="备注（可选）">
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top: 15px;">
+                <button class="btn-success" onclick="executeTransfer()" style="flex:1">执行流转</button>
+                <button class="btn-primary" onclick="runDemoTransfer()" title="自动填表并执行一条示例流转">执行示例流转</button>
+            </div>
+        </div>
+
+        <!-- 供应商与样机管理模块 -->
+        <div class="module" id="supplierModule">
+            <div class="module-title">供应商与样机管理</div>
+            <div class="form-row">
+                <input type="text" id="supplierName" placeholder="供应商名称" style="flex: 1; min-width: 200px;">
+                <button class="btn-primary" onclick="addSupplier()">添加供应商</button>
+            </div>
+            <table id="supplierTable">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">序号</th>
+                        <th style="width: 30%;">供应商名称</th>
+                        <th style="width: 15%;">样机总数</th>
+                        <th style="width: 50%;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 子账号管理模块 -->
+        <div class="module" id="accountModule">
+            <div class="module-title">子账号管理</div>
+            <div class="form-row">
+                <input type="text" id="newAccountName" placeholder="输入子账号名" style="flex: 1; min-width: 200px;">
+                <button class="btn-primary" onclick="addSubAccount()">添加子账号</button>
+            </div>
+            <div id="accountList" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- 流转记录 -->
+        <div class="module">
+            <div class="module-title">流转记录</div>
+            <table class="transfer-log-table" id="transferLogTable">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">时间</th>
+                        <th style="width: 12%;">操作账号</th>
+                        <th style="width: 15%;">转出方</th>
+                        <th style="width: 15%;">转入方</th>
+                                <th style="width: 12%;">型号</th>
+                                <th style="width: 8%;">数量</th>
+                                <th style="width: 15%;">物流单号</th>
+                                <th style="width: 20%;">备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Toast容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <h2>登录</h2>
+            <p>请输入用户名和密码登录。</p>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label for="loginAccount">用户名</label>
+                    <input type="text" id="loginAccount" placeholder="请输入用户名">
+                </div>
+            </div>
+            <div class="form-row" style="align-items: flex-end; gap: 12px;">
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label for="loginPassword">密码</label>
+                    <input type="text" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <button class="btn-secondary" type="button" onclick="fillLoginPassword()">填写密码</button>
+            </div>
+            <div style="display:flex; gap:10px; margin-top: 8px;">
+                <button class="btn-primary" onclick="login()">登录</button>
+            </div>
+            <div class="login-note">子账号密码将随机生成并显示在“子账号管理”中，请妥善保存。</div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全局数据结构 ====================
+        const MAIN_ACCOUNT_NAME = '品牌方';
+        const MAIN_ACCOUNT_PASSWORD = '123456789';
+        let suppliers = [];
+        let accounts = [{ name: MAIN_ACCOUNT_NAME, password: MAIN_ACCOUNT_PASSWORD }];
+        let transfersLog = [];
+        let currentAccount = null;
+        let isAuthenticated = false;
+
+        // ==================== 初始化 ====================
+        function init() {
+            if (!loadState()) {
+                seedTestData();
+            } else {
+                updateSupplierSelects();
+                renderSupplierTable();
+                renderAccountList();
+                updateAccountSelector();
+                updateLogoutButton();
+                updateModuleAccessibility();
+                if (!isAuthenticated) {
+                    showLoginOverlay();
+                } else {
+                    hideLoginOverlay();
+                }
+            }
+            // 绑定型号选择变化以限制数量最大值
+            const modelSelect = document.getElementById('transferModel');
+            if (modelSelect) modelSelect.addEventListener('change', onTransferModelChange);
+        }
+
+        function saveState() {
+            if (!window.localStorage) return;
+            const state = {
+                suppliers,
+                accounts,
+                transfersLog,
+                currentAccount
+            };
+            localStorage.setItem('logisticsAppState', JSON.stringify(state));
+        }
+
+        function loadState() {
+            if (!window.localStorage) return false;
+            try {
+                const raw = localStorage.getItem('logisticsAppState');
+                if (!raw) return false;
+                const state = JSON.parse(raw);
+                if (Array.isArray(state.suppliers)) suppliers = state.suppliers;
+                if (Array.isArray(state.accounts)) accounts = state.accounts;
+                transfersLog = Array.isArray(state.transfersLog) ? state.transfersLog : [];
+                currentAccount = typeof state.currentAccount === 'string' ? state.currentAccount : null;
+                isAuthenticated = currentAccount && accounts.some(acc => acc.name === currentAccount);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function seedTestData() {
+            suppliers = [
+                { id: 1780026807337, name: '供应商A', models: [ { name: 'X100', quantity: 5 }, { name: 'X200', quantity: 2 } ], expanded: false },
+                { id: 1780026809068, name: '供应商B', models: [ { name: 'X100', quantity: 1 } ], expanded: false }
+            ];
+            accounts = [
+                { name: MAIN_ACCOUNT_NAME, password: MAIN_ACCOUNT_PASSWORD },
+                { name: 'alice', password: generatePassword(10) },
+                { name: 'bob', password: generatePassword(10) }
+            ];
+            currentAccount = null;
+            isAuthenticated = false;
+            updateSupplierSelects();
+            renderSupplierTable();
+            updateAccountSelector();
+            renderAccountList();
+            updateModuleAccessibility();
+            saveState();
+            showLoginOverlay();
+            showToast('示例数据已加载，可直接登录使用', 'success');
+        }
+
+        function onTransferModelChange() {
+            const modelSelect = document.getElementById('transferModel');
+            const qtyInput = document.getElementById('transferQty');
+            const opt = modelSelect.options[modelSelect.selectedIndex];
+            if (opt && opt.dataset && opt.dataset.max) {
+                const max = parseInt(opt.dataset.max) || 1;
+                qtyInput.max = max;
+                if (parseInt(qtyInput.value) > max) qtyInput.value = max;
+            } else {
+                qtyInput.max = 999;
+            }
+        }
+
+        function showLoginOverlay() {
+            const overlay = document.getElementById('loginOverlay');
+            if (overlay) overlay.style.display = 'flex';
+            updateAccountSelector();
+        }
+
+        function hideLoginOverlay() {
+            const overlay = document.getElementById('loginOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        // ==================== 物流查询模块 ====================
+        async function queryTracking() {
+            const trackingNumber = document.getElementById('trackingNumber').value.trim();
+            if (!trackingNumber) {
+                showToast('请输入物流单号', 'warning');
+                return;
+            }
+
+            const resultDiv = document.getElementById('trackingResult');
+            resultDiv.className = 'show';
+            resultDiv.innerHTML = '<p>查询中...</p>';
+
+            // 优先尝试使用 fetch 向示例接口发起请求，若失败则回退到 mock
+            const url = `https://api.example.com/tracking?number=${encodeURIComponent(trackingNumber)}`;
+            let responseData = null;
+            try {
+                const resp = await fetch(url, { method: 'GET' });
+                if (resp.ok) {
+                    // 尝试解析为 JSON
+                    try {
+                        responseData = await resp.json();
+                    } catch (e) {
+                        // 非 JSON 或解析失败，回退到 mock
+                        responseData = await mockTrackingAPI(trackingNumber);
+                    }
+                } else {
+                    // 非 2xx 响应，回退到 mock
+                    responseData = await mockTrackingAPI(trackingNumber);
+                }
+            } catch (err) {
+                // fetch 出错（如 CORS / 网络问题），回退到 mock
+                responseData = await mockTrackingAPI(trackingNumber);
+            }
+
+            try {
+                const mockResponse = responseData;
+
+                const historyHTML = mockResponse.history && mockResponse.history.length > 0
+                    ? `<ol class="history-list">${mockResponse.history
+                        .sort((a, b) => new Date(b.time) - new Date(a.time))
+                        .map(h => `<li><span class="history-time">${formatTime(h.time)}</span> - ${h.event}</li>`)
+                        .join('')}</ol>`
+                    : '<p>暂无物流信息</p>';
+
+                const statusClass = getStatusClass(mockResponse.status);
+                resultDiv.className = 'show';
+                resultDiv.innerHTML = `
+                    <div class="tracking-info">
+                        <label>物流单号：</label>
+                        <span class="tracking-number">${mockResponse.number}</span>
+                    </div>
+                    <div class="tracking-info">
+                        <label>当前状态：</label>
+                        <span class="status-badge ${statusClass}">${mockResponse.status}</span>
+                    </div>
+                    <div class="tracking-info">
+                        <label>预计到达：</label>
+                        <span>${formatDateTime(mockResponse.estimatedArrival)}</span>
+                    </div>
+                    <div class="tracking-info">
+                        <label>物流轨迹：</label>
+                        ${historyHTML}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.className = 'show error';
+                resultDiv.innerHTML = '<p style="color: var(--danger-color);">查询失败，请检查单号或网络</p>';
+            }
+        }
+
+        function mockTrackingAPI(number) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const baseTime = new Date();
+                    resolve({
+                        number: number,
+                        status: ['已发货', '运输中', '已签收'][Math.floor(Math.random() * 3)],
+                        estimatedArrival: new Date(baseTime.getTime() + Math.random() * 5 * 24 * 60 * 60 * 1000).toISOString(),
+                        history: [
+                            {
+                                time: new Date(baseTime.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                                event: '已揽收'
+                            },
+                            {
+                                time: new Date(baseTime.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                                event: '已发出'
+                            },
+                            {
+                                time: new Date(baseTime.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                                event: '在途中'
+                            },
+                            {
+                                time: new Date(baseTime.getTime()).toISOString(),
+                                event: '即将送达'
+                            }
+                        ]
+                    });
+                }, 500);
+            });
+        }
+
+        function getStatusClass(status) {
+            if (status === '已发货') return 'status-shipped';
+            if (status === '运输中') return 'status-in-transit';
+            if (status === '已签收') return 'status-delivered';
+            return '';
+        }
+
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        function formatFullDateTime(isoString) {
+            const date = new Date(isoString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // ==================== 供应商管理 ====================
+        function addSupplier() {
+            const nameInput = document.getElementById('supplierName');
+            const name = nameInput.value.trim();
+            if (!name) {
+                showToast('请输入供应商名称', 'warning');
+                return;
+            }
+
+            suppliers.push({
+                id: Date.now(),
+                name: name,
+                models: [], // 样机型号列表
+                expanded: false
+            });
+
+            nameInput.value = '';
+            renderSupplierTable();
+            updateSupplierSelects();
+            saveState();
+            showToast(`已添加供应商：${name}`, 'success');
+        }
+
+        function deleteSupplier(supplierId) {
+            if (!confirm('确定要删除此供应商吗？')) return;
+            suppliers = suppliers.filter(s => s.id !== supplierId);
+            renderSupplierTable();
+            updateSupplierSelects();
+            saveState();
+            showToast('供应商已删除', 'success');
+        }
+
+        function renderSupplierTable() {
+            const tbody = document.querySelector('#supplierTable tbody');
+            tbody.innerHTML = '';
+
+            suppliers.forEach((supplier, index) => {
+                const totalCount = supplier.models.reduce((sum, m) => sum + m.quantity, 0);
+
+                // 主行
+                const mainRow = document.createElement('tr');
+                mainRow.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${supplier.name}</td>
+                    <td><strong>${totalCount}</strong></td>
+                    <td>
+                        <button class="btn-small btn-primary" onclick="togglePrototypeExpand(${supplier.id})">
+                            ${supplier.expanded ? '收起' : '管理样机'}
+                        </button>
+                        <button class="btn-small btn-danger" onclick="deleteSupplier(${supplier.id})" style="margin-left: 5px;">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(mainRow);
+
+                // 嵌套行
+                if (supplier.expanded) {
+                    const nestedRow = document.createElement('tr');
+                    nestedRow.className = 'nested-table-container show';
+                    nestedRow.innerHTML = `
+                        <td colspan="4" style="padding: 0; border: none;">
+                            <table class="nested-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">型号</th>
+                                        <th style="width: 15%;">数量</th>
+                                        <th style="width: 55%;">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${supplier.models.map((model, idx) => `
+                                        <tr>
+                                            <td>${model.name}</td>
+                                            <td>
+                                                <input type="number" 
+                                                    value="${model.quantity}" 
+                                                    min="0" 
+                                                    onchange="updateModelQuantity(${supplier.id}, ${idx}, this.value)"
+                                                    onkeypress="if(event.key==='Enter') this.onchange()"
+                                                    style="width: 60px; padding: 6px 8px; text-align: center;">
+                                            </td>
+                                            <td>
+                                                <button class="btn-small btn-primary" 
+                                                    onclick="changeModelQuantity(${supplier.id}, ${idx}, -1)">-</button>
+                                                <button class="btn-small btn-primary" 
+                                                    onclick="changeModelQuantity(${supplier.id}, ${idx}, 1)"
+                                                    style="margin: 0 5px;">+</button>
+                                                <button class="btn-small btn-danger" 
+                                                    onclick="deleteModel(${supplier.id}, ${idx})">删除</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                    <tr style="background-color: white;">
+                                        <td>
+                                            <input type="text" 
+                                                id="newModel_${supplier.id}" 
+                                                placeholder="输入新型号名"
+                                                style="width: 90%;">
+                                        </td>
+                                        <td colspan="2">
+                                            <button class="btn-small btn-success" 
+                                                onclick="addModel(${supplier.id})">添加新型号</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    `;
+                    tbody.appendChild(nestedRow);
+                }
+            });
+        }
+
+        function togglePrototypeExpand(supplierId) {
+            const supplier = suppliers.find(s => s.id === supplierId);
+            if (supplier) {
+                supplier.expanded = !supplier.expanded;
+                renderSupplierTable();
+            }
+        }
+
+        function addModel(supplierId) {
+            const modelNameInput = document.getElementById(`newModel_${supplierId}`);
+            const modelName = modelNameInput.value.trim();
+            if (!modelName) {
+                showToast('请输入型号名称', 'warning');
+                return;
+            }
+
+            const supplier = suppliers.find(s => s.id === supplierId);
+            if (supplier) {
+                supplier.models.push({ name: modelName, quantity: 0 });
+                modelNameInput.value = '';
+                renderSupplierTable();
+                updateSupplierSelects();
+                saveState();
+                showToast(`已添加型号：${modelName}`, 'success');
+            }
+        }
+
+        function deleteModel(supplierId, modelIndex) {
+            if (!confirm('确定要删除此型号吗？')) return;
+            const supplier = suppliers.find(s => s.id === supplierId);
+            if (supplier) {
+                supplier.models.splice(modelIndex, 1);
+                renderSupplierTable();
+                updateSupplierSelects();
+                saveState();
+                showToast('型号已删除', 'success');
+            }
+        }
+
+        function changeModelQuantity(supplierId, modelIndex, delta) {
+            const supplier = suppliers.find(s => s.id === supplierId);
+            if (supplier) {
+                supplier.models[modelIndex].quantity = Math.max(0, supplier.models[modelIndex].quantity + delta);
+                renderSupplierTable();
+                updateSupplierSelects();
+                saveState();
+            }
+        }
+
+        function updateModelQuantity(supplierId, modelIndex, newValue) {
+            const supplier = suppliers.find(s => s.id === supplierId);
+            if (supplier) {
+                supplier.models[modelIndex].quantity = Math.max(0, parseInt(newValue) || 0);
+                renderSupplierTable();
+                updateSupplierSelects();
+                saveState();
+            }
+        }
+
+        // ==================== 样机流转 ====================
+        function updateSupplierSelects() {
+            const fromSelect = document.getElementById('transferFromSupplier');
+            const toSelect = document.getElementById('transferToSupplier');
+
+            const options = suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            fromSelect.innerHTML = '<option value="">请选择</option>' + options;
+            toSelect.innerHTML = '<option value="">请选择</option>' + options;
+        }
+
+        function updateTransferModels() {
+            const fromSupplierId = document.getElementById('transferFromSupplier').value;
+            const modelSelect = document.getElementById('transferModel');
+
+            if (!fromSupplierId) {
+                modelSelect.innerHTML = '<option value="">请先选择转出供应商</option>';
+                return;
+            }
+
+            const supplier = suppliers.find(s => s.id == fromSupplierId);
+            if (supplier) {
+                const options = supplier.models
+                    .filter(m => m.quantity > 0)
+                    .map(m => `<option value="${m.name}" data-max="${m.quantity}">${m.name} (库存: ${m.quantity})</option>`)
+                    .join('');
+                modelSelect.innerHTML = '<option value="">请选择</option>' + options;
+                document.getElementById('transferQty').value = 1;
+                document.getElementById('transferQty').max = 999;
+            }
+        }
+
+        function increaseTransferQty() {
+            const qtyInput = document.getElementById('transferQty');
+            qtyInput.value = Math.min(parseInt(qtyInput.value) + 1, parseInt(qtyInput.max));
+        }
+
+        function decreaseTransferQty() {
+            const qtyInput = document.getElementById('transferQty');
+            qtyInput.value = Math.max(1, parseInt(qtyInput.value) - 1);
+        }
+
+        function executeTransfer() {
+            const fromSupplierId = document.getElementById('transferFromSupplier').value;
+            const toSupplierId = document.getElementById('transferToSupplier').value;
+            const modelName = document.getElementById('transferModel').value;
+            const quantity = parseInt(document.getElementById('transferQty').value);
+            const tracking = document.getElementById('transferTracking').value.trim();
+            const remark = document.getElementById('transferRemark').value.trim();
+
+            if (!fromSupplierId || !toSupplierId || !modelName || !quantity) {
+                showToast('请填写完整的流转信息', 'warning');
+                return;
+            }
+
+            if (fromSupplierId === toSupplierId) {
+                showToast('转出供应商和转入供应商不能相同', 'warning');
+                return;
+            }
+
+            const fromSupplier = suppliers.find(s => s.id == fromSupplierId);
+            const toSupplier = suppliers.find(s => s.id == toSupplierId);
+            const fromModel = fromSupplier.models.find(m => m.name === modelName);
+
+            if (!fromModel || fromModel.quantity < quantity) {
+                showToast(`数量不足：${fromSupplier.name}${modelName}仅剩${fromModel ? fromModel.quantity : 0}台`, 'error');
+                return;
+            }
+
+            // 二次确认
+            if (!confirm(`确认将${quantity}台${modelName}从${fromSupplier.name}流转至${toSupplier.name}？`)) {
+                return;
+            }
+
+            // 执行流转
+            fromModel.quantity -= quantity;
+            let toModel = toSupplier.models.find(m => m.name === modelName);
+            if (!toModel) {
+                toSupplier.models.push({ name: modelName, quantity: 0 });
+                toModel = toSupplier.models[toSupplier.models.length - 1];
+            }
+            toModel.quantity += quantity;
+
+            // 记录流转
+            const now = new Date();
+            const timeStr = formatFullDateTime(now.toISOString());
+            transfersLog.push({
+                time: timeStr,
+                account: currentAccount,
+                fromSupplier: fromSupplier.name,
+                toSupplier: toSupplier.name,
+                model: modelName,
+                quantity: quantity,
+                tracking: tracking,
+                remark: remark
+            });
+
+            // 更新UI
+            renderSupplierTable();
+            updateTransferModels();
+            renderTransferLog();
+            saveState();
+            let toastMsg = `已将${quantity}台${modelName}从${fromSupplier.name}流转至${toSupplier.name}`;
+            if (tracking) toastMsg += `，运单：${tracking}`;
+            if (remark) toastMsg += `（${remark}）`;
+            showToast(toastMsg, 'success');
+
+            // 重置表单
+            document.getElementById('transferFromSupplier').value = '';
+            document.getElementById('transferToSupplier').value = '';
+            document.getElementById('transferModel').value = '';
+            document.getElementById('transferQty').value = 1;
+            document.getElementById('transferTracking').value = '';
+            document.getElementById('transferRemark').value = '';
+        }
+
+        function renderTransferLog() {
+            const tbody = document.querySelector('#transferLogTable tbody');
+            tbody.innerHTML = '';
+
+            transfersLog.forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${log.time}</td>
+                    <td>${log.account}</td>
+                    <td>${log.fromSupplier}</td>
+                    <td>${log.toSupplier}</td>
+                    <td>${log.model}</td>
+                    <td>${log.quantity}</td>
+                    <td>${log.tracking || ''}</td>
+                    <td>${log.remark || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ==================== 子账号管理 ====================
+        function generatePassword(length = 10) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function login() {
+            const account = document.getElementById('loginAccount').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!account || !password) {
+                showToast('请输入账号和密码', 'warning');
+                return;
+            }
+
+            const user = accounts.find(acc => acc.name === account);
+            if (!user || user.password !== password) {
+                showToast('账号或密码错误', 'error');
+                return;
+            }
+
+            currentAccount = account;
+            isAuthenticated = true;
+            saveState();
+            hideLoginOverlay();
+            updateAccountSelector();
+            updateLogoutButton();
+            updateModuleAccessibility();
+            updateSupplierSelects();
+            renderSupplierTable();
+            renderAccountList();
+            showToast(`登录成功：${currentAccount}`, 'success');
+        }
+
+        function logout() {
+            currentAccount = null;
+            isAuthenticated = false;
+            saveState();
+            updateAccountSelector();
+            updateLogoutButton();
+            updateModuleAccessibility();
+            showLoginOverlay();
+            showToast('已退出当前账号', 'success');
+        }
+
+        function fillLoginPassword() {
+            const account = document.getElementById('loginAccount').value.trim();
+            const user = accounts.find(acc => acc.name === account);
+            if (user) {
+                document.getElementById('loginPassword').value = user.password;
+            }
+        }
+
+        function addSubAccount() {
+            const nameInput = document.getElementById('newAccountName');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                showToast('请输入子账号名', 'warning');
+                return;
+            }
+
+            if (accounts.some(acc => acc.name === name)) {
+                showToast('该账号名已存在', 'warning');
+                return;
+            }
+
+            const password = generatePassword(10);
+            accounts.push({ name, password });
+            nameInput.value = '';
+            updateAccountSelector();
+            renderAccountList();
+            showToast(`已添加子账号：${name}（密码已生成）`, 'success');
+            saveState();
+        }
+
+        function deleteSubAccount(name) {
+            if (name === MAIN_ACCOUNT_NAME) {
+                showToast('不能删除主账号', 'error');
+                return;
+            }
+
+            if (!confirm(`确定要删除子账号 ${name} 吗？`)) return;
+
+            accounts = accounts.filter(acc => acc.name !== name);
+            if (currentAccount === name) {
+                currentAccount = MAIN_ACCOUNT_NAME;
+                updateAccountSelector();
+                updateModuleAccessibility();
+            }
+            renderAccountList();
+            saveState();
+            showToast(`已删除子账号：${name}`, 'success');
+        }
+
+        function updateAccountSelector() {
+            const accountNameEl = document.getElementById('currentAccountName');
+            if (accountNameEl) {
+                accountNameEl.textContent = isAuthenticated && currentAccount ? currentAccount : '未登录';
+            }
+        }
+
+        function updateLogoutButton() {
+            const logoutButton = document.getElementById('logoutButton');
+            if (!logoutButton) return;
+            logoutButton.style.display = isAuthenticated ? 'inline-flex' : 'none';
+        }
+
+        function renderAccountList() {
+            const accountList = document.getElementById('accountList');
+            const subAccounts = accounts.filter(acc => acc.name !== MAIN_ACCOUNT_NAME);
+
+            if (subAccounts.length === 0) {
+                accountList.innerHTML = '<p style="color: var(--placeholder-color);">暂无子账号</p>';
+                return;
+            }
+
+            accountList.innerHTML = `
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${subAccounts.map(acc => `
+                        <div style="background-color: #f7f7f7; padding: 12px 16px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 210px;">
+                            <div style="display:flex; justify-content: space-between; align-items: center; gap: 12px;">
+                                <strong>${acc.name}</strong>
+                                <button class="btn-small btn-danger" onclick="deleteSubAccount('${acc.name}')">删除</button>
+                            </div>
+                            <div style="color: var(--secondary-text); font-size: 13px;">密码：${acc.password}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function updateModuleAccessibility() {
+            const modules = [
+                document.getElementById('trackingModule'),
+                document.getElementById('supplierModule'),
+                document.getElementById('accountModule')
+            ];
+            const disabled = !isAuthenticated || currentAccount !== MAIN_ACCOUNT_NAME;
+
+            modules.forEach(module => {
+                if (disabled) {
+                    module.classList.add('disabled');
+                    const buttons = module.querySelectorAll('button');
+                    const inputs = module.querySelectorAll('input, select');
+                    buttons.forEach(btn => btn.disabled = true);
+                    inputs.forEach(inp => inp.disabled = true);
+                } else {
+                    module.classList.remove('disabled');
+                    const buttons = module.querySelectorAll('button');
+                    const inputs = module.querySelectorAll('input, select');
+                    buttons.forEach(btn => btn.disabled = false);
+                    inputs.forEach(inp => inp.disabled = false);
+                }
+            });
+        }
+
+        // ==================== Toast通知 ====================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-message">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(toast);
+
+            // 自动消失（仅成功提示）
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 3000);
+            }
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', init);
+
+        // 示例自动流转函数（可通过页面按钮运行）
+        function runDemoTransfer() {
+            // 安全检查
+            if (typeof document === 'undefined') return;
+            const from = document.getElementById('transferFromSupplier');
+            if (!from) return;
+            from.value = '1780026807337';
+            from.dispatchEvent(new Event('change', { bubbles: true }));
+            setTimeout(() => {
+                const to = document.getElementById('transferToSupplier');
+                to.value = '1780026809068';
+                to.dispatchEvent(new Event('change', { bubbles: true }));
+                setTimeout(() => {
+                    const modelSel = document.getElementById('transferModel');
+                    for (let i = 0; i < modelSel.options.length; i++) {
+                        const opt = modelSel.options[i];
+                        if (opt.value === 'X100' || opt.text.includes('X100')) { modelSel.value = opt.value; break; }
+                    }
+                    modelSel.dispatchEvent(new Event('change', { bubbles: true }));
+                    document.getElementById('transferQty').value = '1';
+                    document.getElementById('transferTracking').value = 'TN-DEMO-001';
+                    document.getElementById('transferRemark').value = '自动测试流转';
+                    const realConfirm = window.confirm;
+                    window.confirm = () => true;
+                    setTimeout(() => {
+                        if (typeof executeTransfer === 'function') executeTransfer();
+                        window.confirm = realConfirm;
+                    }, 80);
+                }, 120);
+            }, 120);
+        }
+    </script>
+</body>
+</html>
